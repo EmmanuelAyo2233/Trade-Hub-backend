@@ -32,20 +32,34 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://trade-hub-marketplace.vercel.app',
+  'https://marketplace-git-main-emmanuels-projects-8000beb3.vercel.app'
+];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(...process.env.FRONTEND_URL.split(',').map(u => u.trim()));
+}
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    // Or check if the origin exactly matches or contains '.vercel.app' dynamically (very useful for Vercel preview environments)
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
 
 // Socket.IO setup
 const io = new SocketIO(httpServer, {
-  cors: {
-    origin: FRONTEND_URL,
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
-app.use(cors({
-  origin: FRONTEND_URL,
-  credentials: true
-}));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
