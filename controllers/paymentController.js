@@ -43,7 +43,7 @@ export const initializePayment = async (req, res, next) => {
             { display_name: 'Order ID', variable_name: 'order_id', value: orderId },
           ],
         },
-        callback_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/verify`,
+        callback_url: req.body.callbackUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/verify`,
       },
       {
         headers: {
