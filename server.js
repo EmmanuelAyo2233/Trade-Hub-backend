@@ -32,19 +32,16 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 const allowedOrigins = [
   'http://localhost:5173',
   'https://trade-hub-marketplace.vercel.app',
-  'https://marketplace-git-main-emmanuels-projects-8000beb3.vercel.app'
+  FRONTEND_URL
 ];
-if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(...process.env.FRONTEND_URL.split(',').map(u => u.trim()));
-}
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    // Or check if the origin exactly matches or contains '.vercel.app' dynamically (very useful for Vercel preview environments)
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
@@ -115,7 +112,7 @@ io.on('connection', (socket) => {
   socket.on('join_conversation', async (conversationId) => {
     socket.join(`conv_${conversationId}`);
     // Mark messages as delivered when joining
-    await Message.markDelivered(parseInt(conversationId), userId).catch(() => {});
+    await Message.markDelivered(parseInt(conversationId), userId).catch(() => { });
     io.to(`conv_${conversationId}`).emit('messages_delivered', { conversationId, deliveredTo: userId });
   });
 
@@ -135,7 +132,7 @@ io.on('connection', (socket) => {
 
         if (otherSocketId) {
           // Mark as delivered immediately since user is online
-          await Message.markDelivered(parseInt(conversationId), otherUserId).catch(() => {});
+          await Message.markDelivered(parseInt(conversationId), otherUserId).catch(() => { });
           io.to(`conv_${conversationId}`).emit('messages_delivered', { conversationId, deliveredTo: otherUserId });
 
           io.to(otherSocketId).emit('message_notification', {
