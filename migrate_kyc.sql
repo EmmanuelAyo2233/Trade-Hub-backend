@@ -1,0 +1,18 @@
+ALTER TABLE VendorProfiles ADD COLUMN fullName VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN email VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN phoneNumber VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN residentialAddress TEXT NULL;
+ALTER TABLE VendorProfiles ADD COLUMN businessAddress TEXT NULL;
+ALTER TABLE VendorProfiles ADD COLUMN businessName VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN businessCategory VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN businessDescription TEXT NULL;
+ALTER TABLE VendorProfiles ADD COLUMN cacNumber VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN taxIdentificationNumber VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN idDocument VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN selfiePhoto VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN storeLogo VARCHAR(255) NULL;
+ALTER TABLE VendorProfiles ADD COLUMN verificationStatus VARCHAR(50) DEFAULT 'unsubmitted';
+ALTER TABLE VendorProfiles ADD COLUMN isVerified BOOLEAN DEFAULT FALSE;
+ALTER TABLE VendorProfiles ADD COLUMN rejectionReason TEXT NULL;
+ALTER TABLE VendorProfiles ADD COLUMN verifiedAt TIMESTAMP NULL;
+ALTER TABLE VendorProfiles ADD COLUMN verifiedBy INT NULL;

@@ -126,8 +126,8 @@ export const platformWallet = async (req, res, next) => {
 export const getVendors = async (req, res, next) => {
   try {
     const [vendors] = await pool.query(`
-      SELECT u.id, u.email, u.createdAt, u.isActive,
-             vp.name, vp.storeName, vp.storeSlug, vp.location, vp.avatar, vp.isApproved,
+      SELECT u.id as userId, u.email as userEmail, u.createdAt as userCreatedAt, u.isActive,
+             vp.*,
              (SELECT COUNT(*) FROM Products WHERE vendorId = u.id) as productCount,
              (SELECT COUNT(*) FROM Orders WHERE vendorId = u.id) as orderCount
       FROM Users u
@@ -135,8 +135,61 @@ export const getVendors = async (req, res, next) => {
       WHERE u.role = 'vendor'
       ORDER BY u.createdAt DESC
     `);
-    res.json(vendors.map(v => ({ ...v, _id: v.id, isActive: v.isActive === 1, isApproved: v.isApproved === 1 })));
+    res.json(vendors.map(v => ({ 
+      ...v, 
+      _id: v.userId, 
+      email: v.userEmail, 
+      kycEmail: v.email,
+      isActive: v.isActive === 1, 
+      isVerified: v.isVerified === 1,
+      isApproved: v.isVerified === 1 
+    })));
   } catch(e) {
+    next(e);
+  }
+};
+
+// @desc    Approve or Reject a Vendor KYC Verification
+export const reviewVendorKYC = async (req, res, next) => {
+  try {
+    const { id } = req.params; // userId of the vendor
+    const { action, rejectionReason } = req.body; // action: 'approve' | 'reject'
+    
+    if (!action || !['approve', 'reject'].includes(action)) {
+      res.status(400);
+      return next(new Error('Invalid review action. Must be approve or reject.'));
+    }
+    
+    const adminId = req.user._id;
+    const isVerified = action === 'approve';
+    const verificationStatus = action === 'approve' ? 'approved' : 'rejected';
+    const reason = action === 'reject' ? (rejectionReason || 'No reason provided') : null;
+    const verifiedAt = new Date();
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      
+      // Update VendorProfiles
+      await connection.query(`
+        UPDATE VendorProfiles SET
+          isVerified = ?,
+          verificationStatus = ?,
+          rejectionReason = ?,
+          verifiedAt = ?,
+          verifiedBy = ?
+        WHERE userId = ?
+      `, [isVerified ? 1 : 0, verificationStatus, reason, verifiedAt, adminId, id]);
+
+      await connection.commit();
+      res.json({ message: `Vendor KYC has been successfully ${verificationStatus}.` });
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
+  } catch (e) {
     next(e);
   }
 };

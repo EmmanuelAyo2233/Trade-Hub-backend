@@ -9,8 +9,16 @@ class User {
     delete user.password;
     
     if (user.role === 'vendor') {
-        const [profiles] = await pool.query('SELECT name, storeName, storeSlug, storeDescription, location, avatar, isApproved FROM VendorProfiles WHERE userId = ?', [userId]);
-        return { ...user, _id: user.id, ...(profiles[0] || {}), isApproved: profiles[0]?.isApproved === 1 };
+        const [profiles] = await pool.query('SELECT * FROM VendorProfiles WHERE userId = ?', [userId]);
+        const profile = profiles[0] || {};
+        const isVerifiedVal = profile.isVerified === 1;
+        return { 
+          ...user, 
+          _id: user.id, 
+          ...profile, 
+          isVerified: isVerifiedVal,
+          isApproved: isVerifiedVal // backward compatibility mapping
+        };
     } else if (user.role === 'buyer') {
         const [profiles] = await pool.query('SELECT name, location, avatar FROM BuyerProfiles WHERE userId = ?', [userId]);
         return { ...user, _id: user.id, ...(profiles[0] || {}) };

@@ -42,11 +42,11 @@ const vendor = (req, res, next) => {
 const approvedVendor = (req, res, next) => {
   if (req.user && req.user.role === 'admin') return next();
   if (req.user && req.user.role === 'vendor') {
-    if (req.user.isApproved) {
+    if (req.user.isVerified) {
       return next();
     }
     res.status(403);
-    return next(new Error('Your vendor account is pending admin approval. You cannot upload products until approved.'));
+    return next(new Error('Your account must be verified before you can upload or manage products.'));
   }
   res.status(401);
   next(new Error('Not authorized as a vendor'));

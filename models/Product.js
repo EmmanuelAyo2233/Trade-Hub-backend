@@ -3,8 +3,8 @@ import { pool } from '../config/db.js';
 class Product {
   static async findAll({ search, category, minPrice, maxPrice, sort }) {
     let query = `
-      SELECT p.id as _id, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
-             COALESCE(vp.storeName, 'Anonymous Store') as vendorName, vp.storeSlug as vendorSlug
+      SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
+             COALESCE(vp.storeName, 'Anonymous Store') as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
       FROM Products p
       LEFT JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.isActive = 1
@@ -46,7 +46,7 @@ class Product {
   static async findById(id) {
     const [rows] = await pool.query(`
       SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive, p.createdAt,
-             vp.storeName as vendorName, vp.storeSlug as vendorSlug
+             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
       FROM Products p
       LEFT JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.id = ?
@@ -61,8 +61,8 @@ class Product {
 
   static async findByIds(idsArray) {
     const [rows] = await pool.query(`
-      SELECT p.id as _id, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
-             vp.storeName as vendorName, vp.storeSlug as vendorSlug
+      SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
+             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
       FROM Products p
       JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.id IN (?)

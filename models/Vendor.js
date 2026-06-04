@@ -3,7 +3,7 @@ import { pool } from '../config/db.js';
 class Vendor {
   static async findStoreBySlug(slug) {
     const [vp] = await pool.query(`
-      SELECT vp.userId, vp.storeName, vp.storeSlug, vp.storeDescription, vp.avatar, vp.location, u.isActive, vp.isApproved
+      SELECT vp.userId, vp.storeName, vp.storeSlug, vp.storeDescription, vp.avatar, vp.location, u.isActive, vp.isVerified, vp.verificationStatus
       FROM VendorProfiles vp
       JOIN Users u ON vp.userId = u.id
       WHERE vp.storeSlug = ?

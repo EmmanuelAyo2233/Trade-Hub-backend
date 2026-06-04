@@ -3,10 +3,20 @@ import {
   getStoreBySlug,
   updateVendorProfile,
   getVendorStats,
+  submitVendorKYC,
+  getVendorKYCStatus,
 } from '../controllers/vendorController.js';
 import { protect, vendor } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
+
+router.post('/kyc/submit', protect, vendor, upload.fields([
+  { name: 'idDocument', maxCount: 1 },
+  { name: 'selfiePhoto', maxCount: 1 }
+]), submitVendorKYC);
+
+router.get('/kyc/status', protect, vendor, getVendorKYCStatus);
 
 router.put('/me', protect, vendor, updateVendorProfile);
 router.get('/me/stats', protect, vendor, getVendorStats);
