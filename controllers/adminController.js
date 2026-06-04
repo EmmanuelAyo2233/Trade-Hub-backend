@@ -15,7 +15,21 @@ export const getUsers = async (req, res, next) => {
       isActive: u.isActive === 1,
       name: u.role === 'vendor' ? u.vendorName : u.buyerName,
       storeName: u.storeName,
-      isApproved: u.isApproved === 1
+      isApproved: u.isVerified === 1,
+      isVerified: u.isVerified === 1,
+      verificationStatus: u.verificationStatus || 'unsubmitted',
+      fullName: u.fullName,
+      phoneNumber: u.phoneNumber,
+      residentialAddress: u.residentialAddress,
+      businessAddress: u.businessAddress,
+      businessName: u.businessName,
+      businessCategory: u.businessCategory,
+      businessDescription: u.businessDescription,
+      cacNumber: u.cacNumber,
+      taxIdentificationNumber: u.taxIdentificationNumber,
+      idDocument: u.idDocument,
+      selfiePhoto: u.selfiePhoto,
+      rejectionReason: u.rejectionReason
     }));
     
     res.json(mapped);
@@ -174,12 +188,13 @@ export const reviewVendorKYC = async (req, res, next) => {
       await connection.query(`
         UPDATE VendorProfiles SET
           isVerified = ?,
+          isApproved = ?,
           verificationStatus = ?,
           rejectionReason = ?,
           verifiedAt = ?,
           verifiedBy = ?
         WHERE userId = ?
-      `, [isVerified ? 1 : 0, verificationStatus, reason, verifiedAt, adminId, id]);
+      `, [isVerified ? 1 : 0, isVerified ? 1 : 0, verificationStatus, reason, verifiedAt, adminId, id]);
 
       await connection.commit();
       res.json({ message: `Vendor KYC has been successfully ${verificationStatus}.` });

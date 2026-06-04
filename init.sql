@@ -34,6 +34,7 @@ CREATE TABLE VendorProfiles (
     storeDescription TEXT,
     location VARCHAR(255),
     avatar VARCHAR(255),
+    isApproved BOOLEAN DEFAULT TRUE,
     fullName VARCHAR(255) NULL,
     email VARCHAR(255) NULL,
     phoneNumber VARCHAR(255) NULL,
