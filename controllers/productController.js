@@ -63,7 +63,8 @@ export const createProduct = async (req, res, next) => {
     const countInStock = parseInt(stockQty || req.body.countInStock || 0, 10);
     const parsedPrice = parseFloat(price);
     const vendorId = parseInt(req.user._id, 10);
-    const image = req.file ? `/uploads/${req.file.filename}` : 'https://placehold.co/400x400/e2e8f0/94a3b8?text=No+Image';
+    // Cloudinary sets .path to secure_url; disk storage sets .filename
+    const image = req.file ? (req.file.path || `/uploads/${req.file.filename}`) : 'https://placehold.co/400x400/e2e8f0/94a3b8?text=No+Image';
 
     const insertId = await Product.create({
       vendorId, name, description, price: parsedPrice, image, category, countInStock
@@ -95,7 +96,8 @@ export const updateProduct = async (req, res, next) => {
       const updatedDescription = description || product.description;
       const updatedCategory = category || product.category;
       const updatedCountInStock = countInStock !== undefined ? countInStock : (stockQty !== undefined ? stockQty : product.countInStock);
-      let updatedImage = req.file ? `/uploads/${req.file.filename}` : product.image;
+      // Cloudinary sets .path to secure_url; disk storage sets .filename
+      let updatedImage = req.file ? (req.file.path || `/uploads/${req.file.filename}`) : product.image;
 
       await Product.updateById(req.params.id, {
         name: updatedName, price: updatedPrice, description: updatedDescription, 

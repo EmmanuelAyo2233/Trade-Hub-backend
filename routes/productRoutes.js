@@ -9,7 +9,7 @@ import {
   getMyProducts,
 } from '../controllers/productController.js';
 import { protect, vendor, approvedVendor } from '../middleware/authMiddleware.js';
-import upload from '../middleware/uploadMiddleware.js';
+import { uploadProduct } from '../middleware/cloudinaryUpload.js';
 
 const router = express.Router();
 
@@ -19,11 +19,11 @@ router.get('/me', protect, vendor, getMyProducts);
 router.route('/')
   .get(getProducts)
   // Only approved vendors may create products
-  .post(protect, approvedVendor, upload.single('image'), createProduct);
+  .post(protect, approvedVendor, uploadProduct.single('image'), createProduct);
 
 router.route('/:id')
   .get(getProductById)
-  .put(protect, approvedVendor, upload.single('image'), updateProduct)
+  .put(protect, approvedVendor, uploadProduct.single('image'), updateProduct)
   .delete(protect, approvedVendor, deleteProduct);
 
 export default router;

@@ -116,7 +116,8 @@ export const updateUserProfile = async (req, res, next) => {
     const userId = req.user._id;
     let avatarPath = req.user.avatar;
     if (req.file) {
-      avatarPath = `/uploads/${req.file.filename}`;
+      // Cloudinary storage sets .path to secure_url; disk storage sets .filename
+      avatarPath = req.file.path || `/uploads/${req.file.filename}`;
     }
 
     try {

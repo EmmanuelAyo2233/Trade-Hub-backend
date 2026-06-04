@@ -7,11 +7,11 @@ import {
   getVendorKYCStatus,
 } from '../controllers/vendorController.js';
 import { protect, vendor } from '../middleware/authMiddleware.js';
-import upload from '../middleware/uploadMiddleware.js';
+import { uploadKYC } from '../middleware/cloudinaryUpload.js';
 
 const router = express.Router();
 
-router.post('/kyc/submit', protect, vendor, upload.fields([
+router.post('/kyc/submit', protect, vendor, uploadKYC.fields([
   { name: 'idDocument', maxCount: 1 },
   { name: 'selfiePhoto', maxCount: 1 }
 ]), submitVendorKYC);

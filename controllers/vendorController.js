@@ -91,16 +91,17 @@ export const submitVendorKYC = async (req, res, next) => {
     }
     const currentProfile = profiles[0];
 
-    // File handling
+    // File handling - Cloudinary returns secure_url in file.path
     let idDocumentPath = currentProfile.idDocument;
     let selfiePhotoPath = currentProfile.selfiePhoto;
 
     if (req.files) {
       if (req.files.idDocument && req.files.idDocument[0]) {
-        idDocumentPath = `/uploads/${req.files.idDocument[0].filename}`;
+        // Cloudinary storage sets .path to the secure_url; disk storage sets .filename
+        idDocumentPath = req.files.idDocument[0].path || `/uploads/${req.files.idDocument[0].filename}`;
       }
       if (req.files.selfiePhoto && req.files.selfiePhoto[0]) {
-        selfiePhotoPath = `/uploads/${req.files.selfiePhoto[0].filename}`;
+        selfiePhotoPath = req.files.selfiePhoto[0].path || `/uploads/${req.files.selfiePhoto[0].filename}`;
       }
     }
 
