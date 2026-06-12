@@ -13,14 +13,15 @@ const router = express.Router();
 // Public route to fetch reviews for a product
 router.route('/product/:productId').get(getProductReviews);
 
-// Buyer route to submit review
-router.route('/').post(protect, createProductReview);
+// Buyer route to submit review + Admin GET all reviews
+router.route('/')
+  .post(protect, createProductReview)
+  .get(protect, admin, getAllReviews);
 
 // Vendor route to fetch reviews for their store
 router.route('/vendor').get(protect, vendor, getVendorReviews);
 
-// Admin routes
-router.route('/').get(protect, admin, getAllReviews);
+// Admin route to delete a review
 router.route('/:id').delete(protect, admin, deleteReview);
 
 export default router;

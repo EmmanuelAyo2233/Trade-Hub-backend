@@ -27,7 +27,7 @@ export const createProductReview = async (req, res, next) => {
       return next(new Error('Not authorized to review this order'));
     }
 
-    if (order.status !== 'delivered' && !order.isDelivered) {
+    if (order.status !== 'delivered' && order.status !== 'completed' && !order.isDelivered) {
       res.status(400);
       return next(new Error('You can only review products from delivered orders'));
     }
