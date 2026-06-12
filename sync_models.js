@@ -18,6 +18,27 @@ const syncModels = async () => {
     await Message.sync({ alter: true });
     console.log('✅ Messages table synced');
 
+    // Create Reviews table if not exists
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS Reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        productId INT NOT NULL,
+        orderId INT NOT NULL,
+        buyerId INT NOT NULL,
+        rating INT NOT NULL,
+        comment TEXT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (productId) REFERENCES Products(id) ON DELETE CASCADE,
+        FOREIGN KEY (orderId) REFERENCES Orders(id) ON DELETE CASCADE,
+        FOREIGN KEY (buyerId) REFERENCES Users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_buyer_product_order (buyerId, productId, orderId)
+      )
+    `).catch((err) => {
+      console.error('Error creating Reviews table:', err.message);
+    });
+    console.log('✅ Reviews table ensured');
+
     // Add isActive to Users if missing
     await sequelize.query(`ALTER TABLE Users ADD COLUMN IF NOT EXISTS isActive BOOLEAN DEFAULT TRUE`).catch(() => {});
     console.log('✅ Users.isActive column ensured');

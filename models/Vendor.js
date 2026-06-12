@@ -15,23 +15,30 @@ class Vendor {
   static async getVendorStats(userId) {
     const [products] = await pool.query('SELECT COUNT(*) as count FROM Products WHERE vendorId = ?', [userId]);
     const [orders] = await pool.query(`
-      SELECT o.totalAmount, o.status 
-      FROM Orders o
-      JOIN OrderItems oi ON o.id = oi.orderId
-      JOIN Products p ON oi.productId = p.id
-      WHERE p.vendorId = ?
+      SELECT totalPrice, status 
+      FROM Orders 
+      WHERE vendorId = ?
     `, [userId]);
 
-    const completedOrders = orders.filter(o => o.status === 'completed');
-    const totalSales = completedOrders.reduce((acc, o) => acc + parseFloat(o.totalAmount), 0);
+    const completedOrders = orders.filter(o => ['completed', 'delivered'].includes(o.status));
+    const totalSales = completedOrders.reduce((acc, o) => acc + parseFloat(o.totalPrice || 0), 0);
 
     const [users] = await pool.query('SELECT walletBalance FROM Users WHERE id = ?', [userId]);
+
+    const [reviews] = await pool.query(`
+      SELECT COUNT(*) as count, COALESCE(AVG(rating), 0) as avgRating
+      FROM Reviews r
+      JOIN Products p ON r.productId = p.id
+      WHERE p.vendorId = ?
+    `, [userId]);
 
     return {
       productsCount: products[0].count,
       ordersCount: orders.length,
       totalSales,
       walletBalance: users.length > 0 ? parseFloat(users[0].walletBalance) : 0,
+      avgRating: parseFloat(reviews[0].avgRating || 0),
+      reviewsCount: reviews[0].count
     };
   }
 }

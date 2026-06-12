@@ -4,7 +4,9 @@ class Product {
   static async findAll({ search, category, minPrice, maxPrice, sort }) {
     let query = `
       SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
-             COALESCE(vp.storeName, 'Anonymous Store') as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
+             COALESCE(vp.storeName, 'Anonymous Store') as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified,
+             COALESCE((SELECT AVG(rating) FROM Reviews r WHERE r.productId = p.id), 0) as avgRating,
+             COALESCE((SELECT COUNT(*) FROM Reviews r WHERE r.productId = p.id), 0) as numReviews
       FROM Products p
       LEFT JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.isActive = 1
@@ -46,7 +48,9 @@ class Product {
   static async findById(id) {
     const [rows] = await pool.query(`
       SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive, p.createdAt,
-             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
+             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified,
+             COALESCE((SELECT AVG(rating) FROM Reviews r WHERE r.productId = p.id), 0) as avgRating,
+             COALESCE((SELECT COUNT(*) FROM Reviews r WHERE r.productId = p.id), 0) as numReviews
       FROM Products p
       LEFT JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.id = ?
@@ -62,7 +66,9 @@ class Product {
   static async findByIds(idsArray) {
     const [rows] = await pool.query(`
       SELECT p.id as _id, p.vendorId, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
-             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified
+             vp.storeName as vendorName, vp.storeSlug as vendorSlug, vp.isVerified as vendorIsVerified,
+             COALESCE((SELECT AVG(rating) FROM Reviews r WHERE r.productId = p.id), 0) as avgRating,
+             COALESCE((SELECT COUNT(*) FROM Reviews r WHERE r.productId = p.id), 0) as numReviews
       FROM Products p
       JOIN VendorProfiles vp ON p.vendorId = vp.userId
       WHERE p.id IN (?)
@@ -91,7 +97,9 @@ class Product {
 
   static async findByVendorId(vendorId) {
     const [rows] = await pool.query(`
-      SELECT p.id as _id, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive
+      SELECT p.id as _id, p.name, p.description, p.price, p.image, p.category, p.countInStock, p.isActive,
+             COALESCE((SELECT AVG(rating) FROM Reviews r WHERE r.productId = p.id), 0) as avgRating,
+             COALESCE((SELECT COUNT(*) FROM Reviews r WHERE r.productId = p.id), 0) as numReviews
       FROM Products p
       WHERE p.vendorId = ?
     `, [vendorId]);

@@ -71,7 +71,13 @@ class Order {
 
     if (orders.length === 0) return null;
 
-    const [items] = await connectionInstance.query(`SELECT * FROM OrderItems WHERE orderId = ?`, [id]);
+    const [items] = await connectionInstance.query(`
+      SELECT oi.*, 
+             (SELECT id FROM Reviews r WHERE r.orderId = oi.orderId AND r.productId = oi.productId) as reviewId,
+             (SELECT rating FROM Reviews r WHERE r.orderId = oi.orderId AND r.productId = oi.productId) as reviewRating
+      FROM OrderItems oi 
+      WHERE oi.orderId = ?
+    `, [id]);
     
     const o = orders[0];
     return {

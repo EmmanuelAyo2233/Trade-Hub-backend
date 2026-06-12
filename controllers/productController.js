@@ -11,7 +11,9 @@ const formatProduct = p => ({
   stockQty: p.countInStock,
   isActive: p.isActive === 1,
   createdAt: p.createdAt,
-  vendorId: p.vendorName ? { _id: p.vendorId, storeName: p.vendorName, storeSlug: p.vendorSlug, isVerified: p.vendorIsVerified === 1 } : undefined
+  vendorId: p.vendorName ? { _id: p.vendorId, storeName: p.vendorName, storeSlug: p.vendorSlug, isVerified: p.vendorIsVerified === 1 } : undefined,
+  avgRating: parseFloat(p.avgRating || 0),
+  numReviews: parseInt(p.numReviews || 0, 10),
 });
 
 // @desc    Fetch all products
